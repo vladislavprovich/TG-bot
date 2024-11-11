@@ -1,4 +1,4 @@
-module tgbot
+module github.com/vladislavprovich/TG-bot
 
 go 1.23.2
 

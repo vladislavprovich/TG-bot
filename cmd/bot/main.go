@@ -2,62 +2,79 @@ package main
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/joho/godotenv"
-	"log"
-	"os"
+	"github.com/vladislavprovich/TG-bot/cmd/config"
+	"github.com/vladislavprovich/TG-bot/internal/handler"
 )
 
 func main() {
-	// Завантаження змінних середовища з файлу .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	cfg := config.LoadBotConfig()
 
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_APITOKEN"))
+	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
 		panic(err)
 	}
+
 	bot.Debug = true
 
-	// Create a new UpdateConfig struct with an offset of 0. Offsets are used
-	// to make sure Telegram knows we've handled previous values and we don't
-	// need them repeated.
-	updateConfig := tgbotapi.NewUpdate(0)
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
 
-	// Tell Telegram we should wait up to 30 seconds on each request for an
-	// update. This way we can get information just as quickly as making many
-	// frequent requests without having to send nearly as many.
-	updateConfig.Timeout = 30
+	updates := bot.GetUpdatesChan(u)
 
-	// Start polling Telegram for updates.
-	updates := bot.GetUpdatesChan(updateConfig)
-
-	// Let's go through each update that we're getting from Telegram.
 	for update := range updates {
-		// Telegram can send many types of updates depending on what your Bot
-		// is up to. We only want to look at messages for now, so we can
-		// discard any other updates.
-		if update.Message == nil {
-			continue
+		if update.Message != nil && update.Message.Text == "/start" {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вітаю! Оберіть опцію:")
+			msg.ReplyMarkup = handler.MainMenu()
+			bot.Send(msg)
 		}
 
-		// Now that we know we've gotten a new message, we can construct a
-		// reply! We'll take the Chat ID and Text from the incoming message
-		// and use it to create a new message.
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		// We'll also say that this message is a reply to the previous message.
-		// For any other specifications than Chat ID or Text, you'll need to
-		// set fields on the `MessageConfig`.
-		msg.ReplyToMessageID = update.Message.MessageID
+		if update.CallbackQuery != nil {
+			var responseText string
+			var replyMarkup tgbotapi.InlineKeyboardMarkup
 
-		// Okay, we're sending our message off! We don't care about the message
-		// we just sent, so we'll discard it.
-		if _, err = bot.Send(msg); err != nil {
-			// Note that panics are a bad way to handle errors. Telegram can
-			// have service outages or network errors, you should retry sending
-			// messages or more gracefully handle failures.
-			panic(err)
+			switch update.CallbackQuery.Data {
+			case "create_short_url":
+				responseText = "Виберіть опцію"
+				replyMarkup = handler.CreateURL()
+			case "list_short_urls":
+				responseText = "Ось список всіх ваших скорочених URL:"
+				replyMarkup = handler.BackMenu()
+			case "show_url_stats":
+				responseText = "URL статистика:"
+				replyMarkup = handler.BackMenu()
+			case "settings":
+				responseText = "Налаштування: Ви можете очистити історію URL."
+				replyMarkup = handler.ClearAndBack()
+			case "back_to_main":
+				responseText = "Вітаю! Оберіть опцію:"
+				replyMarkup = handler.MainMenu()
+			case "clear_history":
+				responseText = "Історію видалено.\nВітаю! Оберіть опцію:"
+				replyMarkup = handler.MainMenu()
+			case "rand_url":
+				responseText = "Твоя коротка URL:"
+				replyMarkup = handler.MainMenu()
+			case "cust_url":
+				responseText = "Твоя custom URL:"
+				replyMarkup = handler.MainMenu()
+			default:
+				responseText = "Невідома команда."
+				replyMarkup = handler.MainMenu()
+			}
+
+			// Оновлюємо повідомлення
+			editMsg := tgbotapi.NewEditMessageTextAndMarkup(
+				update.CallbackQuery.Message.Chat.ID,
+				update.CallbackQuery.Message.MessageID,
+				responseText,
+				replyMarkup,
+			)
+			bot.Send(editMsg)
+
+			callback := tgbotapi.CallbackConfig{
+				CallbackQueryID: update.CallbackQuery.ID,
+			}
+			bot.Request(callback)
 		}
 	}
 }
