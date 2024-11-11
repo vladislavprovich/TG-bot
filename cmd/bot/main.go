@@ -4,17 +4,19 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/vladislavprovich/TG-bot/cmd/config"
 	"github.com/vladislavprovich/TG-bot/internal/handler"
+	"github.com/vladislavprovich/TG-bot/internal/keyboard"
 )
 
 func main() {
 	cfg := config.LoadBotConfig()
 
-	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
-	if err != nil {
-		panic(err)
-	}
+	//bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//bot.Debug = true
 
-	bot.Debug = true
+	bot := handler.BotInit(*cfg)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -24,7 +26,7 @@ func main() {
 	for update := range updates {
 		if update.Message != nil && update.Message.Text == "/start" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вітаю! Оберіть опцію:")
-			msg.ReplyMarkup = handler.MainMenu()
+			msg.ReplyMarkup = keyboard.MainMenu()
 			bot.Send(msg)
 		}
 
@@ -35,31 +37,31 @@ func main() {
 			switch update.CallbackQuery.Data {
 			case "create_short_url":
 				responseText = "Виберіть опцію"
-				replyMarkup = handler.CreateURL()
+				replyMarkup = keyboard.CreateURL()
 			case "list_short_urls":
 				responseText = "Ось список всіх ваших скорочених URL:"
-				replyMarkup = handler.BackMenu()
+				replyMarkup = keyboard.BackMenu()
 			case "show_url_stats":
 				responseText = "URL статистика:"
-				replyMarkup = handler.BackMenu()
+				replyMarkup = keyboard.BackMenu()
 			case "settings":
 				responseText = "Налаштування: Ви можете очистити історію URL."
-				replyMarkup = handler.ClearAndBack()
+				replyMarkup = keyboard.ClearAndBack()
 			case "back_to_main":
 				responseText = "Вітаю! Оберіть опцію:"
-				replyMarkup = handler.MainMenu()
+				replyMarkup = keyboard.MainMenu()
 			case "clear_history":
 				responseText = "Історію видалено.\nВітаю! Оберіть опцію:"
-				replyMarkup = handler.MainMenu()
+				replyMarkup = keyboard.MainMenu()
 			case "rand_url":
 				responseText = "Твоя коротка URL:"
-				replyMarkup = handler.MainMenu()
+				replyMarkup = keyboard.MainMenu()
 			case "cust_url":
 				responseText = "Напиши свою custom URL:"
-				replyMarkup = handler.MainMenu()
+				replyMarkup = keyboard.MainMenu()
 			default:
 				responseText = "Невідома команда."
-				replyMarkup = handler.MainMenu()
+				replyMarkup = keyboard.MainMenu()
 			}
 
 			// Оновлюємо повідомлення
@@ -69,7 +71,7 @@ func main() {
 				responseText,
 				replyMarkup,
 			)
-			_, err = bot.Send(editMsg)
+			_, err := bot.Send(editMsg)
 			if err != nil {
 				panic(err)
 			}
