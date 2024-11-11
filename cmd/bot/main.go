@@ -55,7 +55,7 @@ func main() {
 				responseText = "Твоя коротка URL:"
 				replyMarkup = handler.MainMenu()
 			case "cust_url":
-				responseText = "Твоя custom URL:"
+				responseText = "Напиши свою custom URL:"
 				replyMarkup = handler.MainMenu()
 			default:
 				responseText = "Невідома команда."
@@ -69,12 +69,19 @@ func main() {
 				responseText,
 				replyMarkup,
 			)
-			bot.Send(editMsg)
+			_, err = bot.Send(editMsg)
+			if err != nil {
+				panic(err)
+			}
 
 			callback := tgbotapi.CallbackConfig{
 				CallbackQueryID: update.CallbackQuery.ID,
 			}
-			bot.Request(callback)
+			_, err = bot.Request(callback)
+			if err != nil {
+				panic(err)
+			}
+
 		}
 	}
 }
