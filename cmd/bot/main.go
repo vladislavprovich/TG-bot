@@ -7,15 +7,11 @@ import (
 	"github.com/vladislavprovich/TG-bot/internal/keyboard"
 )
 
+// пишем клієнт, потом в репозиторій пишемо інтерфейс з методами, і йдем на сервіс робити логіку
+
 func main() {
+
 	cfg := config.LoadBotConfig()
-
-	//bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//bot.Debug = true
-
 	bot := handler.BotInit(*cfg)
 
 	u := tgbotapi.NewUpdate(0)
@@ -64,7 +60,7 @@ func main() {
 				replyMarkup = keyboard.MainMenu()
 			}
 
-			// Оновлюємо повідомлення
+			// Update msg
 			editMsg := tgbotapi.NewEditMessageTextAndMarkup(
 				update.CallbackQuery.Message.Chat.ID,
 				update.CallbackQuery.Message.MessageID,
