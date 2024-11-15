@@ -2,24 +2,24 @@ package shortener
 
 import "time"
 
-type CreateShortUrlRequest struct {
-	// user send original usr.
+type CreateShortURLRequest struct {
+	// user send original url.
 	URL string `json:"url"`
-	// user send custom url (option).
+	// user send custom url (optional).
 	CustomAlias *string `json:"custom_alias,omitempty"`
 }
 
-type CreateShortUrlResponse struct {
+type CreateShortURLResponse struct {
 	// returns short url.
 	ShortURL string `json:"short_url"`
 }
 
-type GetShortUrlRequest struct {
+type GetShortURLStatsRequest struct {
 	// user send short url.
 	ShortURL string `json:"short_url"`
 }
 
-type GetShortUrlResponse struct {
+type GetShortURLStatsResponse struct {
 	// the number of conversions for a short link.
 	RedirectCount int `json:"redirect_count"`
 	// time to created short url.

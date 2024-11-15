@@ -6,9 +6,9 @@ import (
 )
 
 type Config struct {
-	Port       string `envconfig:"SERVER_PORT" default:"8080"`
-	BaseURL    string `envconfig:"BASE_URL" default:"http://localhost:8080/shorten"`
-	BaseGetURL string `envconfig:"BASE_GET_URL" default:"http://localhost:8080/:url/shorten"`
+	Port       string `envconfig:"SERVER_PORT" `
+	BaseURL    string `envconfig:"BASE_URL" `
+	BaseGetURL string `envconfig:"BASE_GET_URL"`
 	// todo add if needed
 }
 

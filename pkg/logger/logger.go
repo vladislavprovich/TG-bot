@@ -4,17 +4,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewLogger(LVLlog string) *logrus.Logger {
+const (
+	debug = "debug"
+	info  = "info"
+)
+
+func NewLogger(cfg ConfigLogger) *logrus.Logger {
 	logger := logrus.New()
 
-	if LVLlog == "prod" {
+	switch cfg.Level {
+	case debug:
+		logger.SetLevel(logrus.DebugLevel)
+		logger.SetFormatter(&logrus.JSONFormatter{})
+	case info:
+		logger.SetLevel(logrus.InfoLevel)
+		logger.SetFormatter(&logrus.TextFormatter{})
+	default:
 		logger.SetLevel(logrus.InfoLevel)
 		logger.SetFormatter(&logrus.JSONFormatter{})
-	} else {
-		logger.SetLevel(logrus.DebugLevel)
-		logger.SetFormatter(&logrus.TextFormatter{
-			FullTimestamp: true,
-		})
 	}
 	return logger
 }

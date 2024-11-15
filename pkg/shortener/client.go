@@ -17,8 +17,8 @@ type BasicClient struct {
 }
 
 type Client interface {
-	CreateShortUrl(ctx context.Context, req *CreateShortUrlRequest) (*CreateShortUrlResponse, error)
-	GetStatsUrl(ctx context.Context, req *GetShortUrlRequest) (*GetShortUrlResponse, error)
+	CreateShortUrl(ctx context.Context, req *CreateShortURLRequest) (*CreateShortURLResponse, error)
+	GetStatsUrl(ctx context.Context, req *GetShortURLStatsRequest) (*GetShortURLStatsResponse, error)
 }
 
 func NewBasicClient(config *Config, httpClient *http.Client, logger *logrus.Logger) BasicClient {
@@ -29,7 +29,7 @@ func NewBasicClient(config *Config, httpClient *http.Client, logger *logrus.Logg
 	}
 }
 
-func (c *BasicClient) CreateShortUrl(ctx context.Context, req *CreateShortUrlRequest) (*CreateShortUrlResponse, error) {
+func (c *BasicClient) CreateShortUrl(ctx context.Context, req *CreateShortURLRequest) (*CreateShortURLResponse, error) {
 	jsonReq, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling request: %w", err)
@@ -61,7 +61,7 @@ func (c *BasicClient) CreateShortUrl(ctx context.Context, req *CreateShortUrlReq
 		return nil, fmt.Errorf("error reading body: %v", err)
 	}
 
-	var res CreateShortUrlResponse
+	var res CreateShortURLResponse
 	if err = json.Unmarshal(body, &res); err != nil {
 		return nil, fmt.Errorf("bad response body: %s", string(body))
 	}
@@ -69,7 +69,7 @@ func (c *BasicClient) CreateShortUrl(ctx context.Context, req *CreateShortUrlReq
 	return &res, nil
 }
 
-func (c *BasicClient) GetStatsUrl(ctx context.Context, req *GetShortUrlRequest) (*GetShortUrlResponse, error) {
+func (c *BasicClient) GetStatsUrl(ctx context.Context, req *GetShortURLStatsRequest) (*GetShortURLStatsResponse, error) {
 	jsonReq, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling request: %w", err)
@@ -101,7 +101,7 @@ func (c *BasicClient) GetStatsUrl(ctx context.Context, req *GetShortUrlRequest) 
 		return nil, fmt.Errorf("error reading body: %v", err)
 	}
 
-	var res GetShortUrlResponse
+	var res GetShortURLStatsResponse
 	if err = json.Unmarshal(body, &res); err != nil {
 		return nil, fmt.Errorf("bad response body: %s", string(body))
 	}
