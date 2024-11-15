@@ -6,10 +6,7 @@ import (
 	"github.com/vladislavprovich/TG-bot/internal/keyboard"
 )
 
-// пишем клієнт, потом в репозиторій пишемо інтерфейс з методами, і йдем на сервіс робити логіку
-
 func main() {
-
 	cfg := handler.LoadBotConfig()
 	bot := handler.BotInit(*cfg)
 
