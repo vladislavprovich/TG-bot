@@ -2,7 +2,6 @@ package main
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/vladislavprovich/TG-bot/cmd/config"
 	"github.com/vladislavprovich/TG-bot/internal/handler"
 	"github.com/vladislavprovich/TG-bot/internal/keyboard"
 )
@@ -11,7 +10,7 @@ import (
 
 func main() {
 
-	cfg := config.LoadBotConfig()
+	cfg := handler.LoadBotConfig()
 	bot := handler.BotInit(*cfg)
 
 	u := tgbotapi.NewUpdate(0)

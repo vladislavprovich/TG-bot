@@ -1,26 +1,26 @@
-# Назва виконуваного файлу лінтера
+# name file
 LINTER = golangci-lint
 
-# Мета за замовчуванням
+
 all: lint
 
-# Інсталяція golangci-lint'
+# download golangci-lint'
 install-linter:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-# Перевірка коду за допомогою лінтерів
+# linter check code
 lint:
 	$(LINTER) run
 
-# Автофікс проблем, які може виправити лінтер
+# auto fix problem
 lint-fix:
 	$(LINTER) run --fix
 
-# Чистка згенерованих файлів (опціонально)
+# clear generate file (optional)
 clean:
 	rm -rf $(LINTER)
 
-# Допомога (виведе доступні команди)
+# help list
 help:
 	@echo "Makefile для запуску Go лінтера"
 	@echo "Доступні команди:"
