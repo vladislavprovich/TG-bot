@@ -10,7 +10,7 @@ type CreateShortURLRequest struct {
 }
 
 type CreateShortURLResponse struct {
-	// returns short url.
+	// return created short url.
 	ShortURL string `json:"short_url"`
 }
 
@@ -20,8 +20,8 @@ type GetShortURLStatsRequest struct {
 }
 
 type GetShortURLStatsResponse struct {
-	// the number of conversions for a short link.
+	// the number of redirect for a short link
 	RedirectCount int `json:"redirect_count"`
-	// time to created short url.
+	// short url creation date.
 	CreatedAt time.Time `json:"created_at"`
 }
