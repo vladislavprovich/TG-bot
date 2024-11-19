@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	"github.com/vladislavprovich/TG-bot/internal/repository/test"
 )
 
 type URLRepository interface {
@@ -14,11 +13,11 @@ type URLRepository interface {
 }
 
 type urlRepository struct {
-	db     test.DBExecutor
-	logger logrus.Logger
+	db     DB
+	logger *logrus.Logger
 }
 
-func NewBotRepository(db test.DBExecutor, logger logrus.Logger) URLRepository {
+func NewBotRepository(db DB, logger *logrus.Logger) URLRepository {
 	return &urlRepository{
 		db:     db,
 		logger: logger,
