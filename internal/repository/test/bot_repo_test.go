@@ -2,28 +2,28 @@ package test
 
 import (
 	"context"
-	"database/sql"
 	"errors"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	repository "github.com/vladislavprovich/TG-bot/internal/repository"
 	mocks "github.com/vladislavprovich/TG-bot/mocks"
 	"go.uber.org/mock/gomock"
+	"regexp"
 	"testing"
 )
 
 // Example
 func TestUrlRepository_SaveURL(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
 
-	// Create mock instances
-	mockDB := mocks.NewMockDB(ctrl)
 	logger := logrus.New()
-
-	// Create repository with mocks
-	repo := repository.NewBotRepository(mockDB, logger)
+	repo := repository.NewBotRepository(db, logger)
 
 	ctx := context.Background()
 	req := &repository.SaveUrlRequest{
@@ -34,22 +34,20 @@ func TestUrlRepository_SaveURL(t *testing.T) {
 		},
 	}
 
-	query := "INSERT INTO urls (user_id, original_url, short_url) VALUES (:user_id, :original_url, :short_url)"
-	params := map[string]interface{}{
-		"user_id":      req.UserID,
-		"original_url": req.URL.OriginalURL,
-		"short_url":    req.URL.ShortURL,
-	}
+	// TODO using \\
+	// "INSERT INTO urls \\(user_id, original_url, short_url\\) VALUES \\(\\?, \\?, \\?\\)"
+	query := "INSERT INTO urls (user_id, original_url, short_url) VALUES (?, ?, ?)"
+	mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(req.UserID, req.URL.OriginalURL, req.URL.ShortURL).
+		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	// Set expectations
-	mockDB.
-		EXPECT().
-		NamedExecContext(ctx, query, params).
-		Return(sql.Result(nil), nil)
-
-	err := repo.SaveURL(ctx, req)
+	err = repo.SaveURL(ctx, req)
 
 	assert.NoError(t, err)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("There were unfulfilled expectations: %s", err)
+	}
 }
 
 func TestSaveURL(t *testing.T) {

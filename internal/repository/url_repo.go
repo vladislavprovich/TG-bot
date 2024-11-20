@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,11 +14,11 @@ type URLRepository interface {
 }
 
 type urlRepository struct {
-	db     DB
+	db     *sql.DB
 	logger *logrus.Logger
 }
 
-func NewBotRepository(db DB, logger *logrus.Logger) URLRepository {
+func NewBotRepository(db *sql.DB, logger *logrus.Logger) URLRepository {
 	return &urlRepository{
 		db:     db,
 		logger: logger,
