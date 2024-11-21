@@ -10,12 +10,12 @@ type DeleteAllURLRequest struct {
 }
 
 type GetListURLRequest struct {
-	UserID string
+	UserID string `json:"user_id"`
 }
 
 type SaveUrlRequest struct {
 	UserID string       `json:"user_id"`
-	URL    *URLCombined `json:"url_combinate"`
+	URL    *URLCombined `json:"url_combined"`
 }
 
 type URLCombined struct {
