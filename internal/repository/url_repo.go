@@ -73,7 +73,7 @@ func (r *urlRepository) DeleteAllURL(ctx context.Context, req *DeleteAllURLReque
 }
 
 func (r *urlRepository) DeleteURL(ctx context.Context, req *DeleteURLRequest) error {
-	query := `DELETE FROM urls WHERE (user_id = ? AND original_url = $1)`
+	query := `DELETE FROM urls WHERE (user_id = $1 AND original_url = $2)`
 	_, err := r.db.ExecContext(ctx, query, req.UserID, req.OriginalURL)
 	if err != nil {
 		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.UserID, err)
