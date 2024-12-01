@@ -2,7 +2,7 @@ package keyboard
 
 import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-func MainMenu() tgbotapi.InlineKeyboardMarkup {
+func MainMenu() *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Create short URL", "create_short_url"),
@@ -13,37 +13,47 @@ func MainMenu() tgbotapi.InlineKeyboardMarkup {
 			tgbotapi.NewInlineKeyboardButtonData("Settings", "settings"),
 		),
 	)
-	return keyboard
+	return &keyboard
 }
 
-func BackMenu() tgbotapi.InlineKeyboardMarkup {
+func BackMenu() *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Back", "back_to_main"),
 		),
 	)
-	return keyboard
+	return &keyboard
 }
 
-func ClearAndBack() tgbotapi.InlineKeyboardMarkup {
+func ClearAndBack() *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Clear History", "clear_history"),
 			tgbotapi.NewInlineKeyboardButtonData("Back", "back_to_main"),
 		),
 	)
-	return keyboard
+	return &keyboard
 }
 
-func CreateURL() tgbotapi.InlineKeyboardMarkup {
+func CreateURL() *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Create Random", "rand_url"),
+
 			tgbotapi.NewInlineKeyboardButtonData("Create Custom", "cust_url"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Back", "back_to_main"),
 		),
 	)
-	return keyboard
+	return &keyboard
+}
+
+func DeleteShortURL() *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup()
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Delete Short", "delete_short_url"),
+		tgbotapi.NewInlineKeyboardButtonData("Back", "back_to_main"),
+	)
+	return &keyboard
 }
