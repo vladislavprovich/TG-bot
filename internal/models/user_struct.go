@@ -18,8 +18,8 @@ type UserAction struct {
 }
 
 type CreateShortUrlRequest struct {
-	TgID int64 `json:"tg_id"`
-	//UserID      string  `json:"user_id"`
+	TgID        int64   `json:"tg_id"`
+	UserID      string  `json:"user_id"`
 	OriginalUrl string  `json:"original_url"`
 	CustomAlias *string `json:"custom_alias,omitempty"`
 }
@@ -32,6 +32,7 @@ type DeleteShortUrl struct {
 	TgID int64 `json:"tg_id"`
 	//UserID      string `json:"user_id"`
 	OriginalUrl string `json:"original_url"`
+	ShortUrl    string `json:"short_url"`
 }
 
 type GetListRequest struct {
@@ -47,4 +48,10 @@ type GetListResponse struct {
 type DeleteAllUrl struct {
 	TgID int64 `json:"tg_id"`
 	//UserID string `json:"user_id"`
+}
+
+type CreateNewUserRequest struct {
+	TgID     int64  `json:"tg_id"`
+	UserID   string `json:"user_id"`
+	UserName string `json:"username"`
 }

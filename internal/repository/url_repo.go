@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,11 +14,11 @@ type URLRepository interface {
 }
 
 type urlRepository struct {
-	db     DB
+	db     *sql.DB
 	logger *logrus.Logger
 }
 
-func NewBotRepository(db DB, logger *logrus.Logger) URLRepository {
+func NewBotRepository(db *sql.DB, logger *logrus.Logger) URLRepository {
 	return &urlRepository{
 		db:     db,
 		logger: logger,
@@ -35,7 +36,7 @@ func (r *urlRepository) SaveURL(ctx context.Context, req *SaveUrlRequest) error 
 
 func (r *urlRepository) GetListURL(ctx context.Context, req *GetListURLRequest) ([]*URLCombined, error) {
 	query := `SELECT original_url, short_url FROM urls WHERE user_id = $1`
-	rows, err := r.db.QueryContext(ctx, query, req.UserID)
+	rows, err := r.db.QueryContext(ctx, query, req.TgID)
 	if err != nil {
 		return nil, err
 	}
@@ -64,9 +65,9 @@ func (r *urlRepository) GetListURL(ctx context.Context, req *GetListURLRequest) 
 
 func (r *urlRepository) DeleteAllURL(ctx context.Context, req *DeleteAllURLRequest) error {
 	query := `DELETE FROM urls WHERE user_id = $1`
-	_, err := r.db.ExecContext(ctx, query, req.UserID)
+	_, err := r.db.ExecContext(ctx, query, req.TgID)
 	if err != nil {
-		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.UserID, err)
+		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.TgID, err)
 		return err
 	}
 	return nil
@@ -74,9 +75,9 @@ func (r *urlRepository) DeleteAllURL(ctx context.Context, req *DeleteAllURLReque
 
 func (r *urlRepository) DeleteURL(ctx context.Context, req *DeleteURLRequest) error {
 	query := `DELETE FROM urls WHERE (user_id = $1 AND original_url = $2)`
-	_, err := r.db.ExecContext(ctx, query, req.UserID, req.OriginalURL)
+	_, err := r.db.ExecContext(ctx, query, req.TgID, req.OriginalURL)
 	if err != nil {
-		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.UserID, err)
+		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.TgID, err)
 		return err
 	}
 	return nil

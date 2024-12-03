@@ -1,16 +1,19 @@
 package repository
 
 type DeleteURLRequest struct {
-	UserID      string `json:"user_id"`
+	TgID int64 `json:"tg_id"`
+	//UserID      string `json:"user_id"`
 	OriginalURL string `json:"original_url"`
 }
 
 type DeleteAllURLRequest struct {
-	UserID string `json:"user_id"`
+	TgID int64 `json:"tg_id"`
+	//UserID string `json:"user_id"`
 }
 
 type GetListURLRequest struct {
-	UserID string `json:"user_id"`
+	TgID int64 `json:"tg_id"`
+	//UserID string `json:"user_id"`
 }
 
 type SaveUrlRequest struct {

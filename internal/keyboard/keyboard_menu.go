@@ -1,6 +1,10 @@
 package keyboard
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+import (
+	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/vladislavprovich/TG-bot/internal/models"
+)
 
 func MainMenu() *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
@@ -49,11 +53,22 @@ func CreateURL() *tgbotapi.InlineKeyboardMarkup {
 	return &keyboard
 }
 
-func DeleteShortURL() *tgbotapi.InlineKeyboardMarkup {
-	keyboard := tgbotapi.NewInlineKeyboardMarkup()
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Delete Short", "delete_short_url"),
+func CreateURLListWithDeleteButtons(urls []*models.GetListResponse) *tgbotapi.InlineKeyboardMarkup {
+	var rows [][]tgbotapi.InlineKeyboardButton
+
+	for _, url := range urls {
+		row := tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", url.OriginalUrl), "url"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", url.ShortUrl), "url"),
+			tgbotapi.NewInlineKeyboardButtonData("Delete", fmt.Sprintf("delete_short_url:%s", url.ShortUrl)),
+		)
+		rows = append(rows, row)
+	}
+
+	backRow := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Back", "back_to_main"),
 	)
-	return &keyboard
+	rows = append(rows, backRow)
+
+	return &tgbotapi.InlineKeyboardMarkup{InlineKeyboard: rows}
 }

@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"time"
 )
 
 func PrepareConnection(ctx context.Context, config Config, logger *logrus.Logger) (*sql.DB, error) {
-	// Validate Config
 	if err := config.ValidateWithContext(ctx); err != nil {
 		return nil, fmt.Errorf("validate Postgres config: %w", err)
 	}
@@ -23,15 +23,15 @@ func PrepareConnection(ctx context.Context, config Config, logger *logrus.Logger
 	db.SetMaxIdleConns(config.MaxIdleConnections)
 	db.SetConnMaxLifetime(config.ConnMaxLifetime)
 
-	// Verify connection
 	ctxPing, cancelPing := context.WithTimeout(ctx, 5*time.Second)
 	defer cancelPing()
+
+	fmt.Printf("config %v", config)
 
 	if err = db.PingContext(ctxPing); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	// Initialize Database
 	if err = ensureTables(ctx, db, config, logger); err != nil {
 		return nil, fmt.Errorf("ensure tables: %w", err)
 	}
@@ -62,14 +62,6 @@ func ensureTables(ctx context.Context, db *sql.DB, cfg Config, logger *logrus.Lo
         created_at TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
     );
-    `,
-		// Add index on short_url for performance
-		`
-    CREATE INDEX IF NOT EXISTS idx_urls_short_url ON urls (short_url);
-    `,
-		// Add index on created_at for sorting by creation date
-		`
-    CREATE INDEX IF NOT EXISTS idx_urls_created_at ON urls (created_at);
     `,
 	}
 
