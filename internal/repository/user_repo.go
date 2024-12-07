@@ -31,8 +31,12 @@ func (u *userRepo) SaveUser(ctx context.Context, req *SaveUserRequest) error {
         VALUES ($1, $2, $3)
         ON CONFLICT (telegram_id) DO NOTHING
     `
+
 	_, err := u.db.ExecContext(ctx, query, req.UserID, req.TgID, req.UserName)
 	if err != nil {
+		u.logger.Errorf(req.UserID)
+		u.logger.Error(req.TgID)
+		u.logger.Errorf(req.UserName)
 		u.logger.Errorf("Failed to save user: %v", err)
 		return fmt.Errorf("error saving user: %w", err)
 	}

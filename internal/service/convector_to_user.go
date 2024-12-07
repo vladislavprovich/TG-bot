@@ -14,10 +14,11 @@ func NewConverterToUser() *converterToUser {
 
 func (c *converterToUser) converterToNewUser(
 	req models.CreateNewUserRequest,
+	UserID string,
 ) *repository.SaveUserRequest {
 	return &repository.SaveUserRequest{
 		TgID:     req.TgID,
-		UserID:   req.UserID,
+		UserID:   UserID,
 		UserName: req.UserName,
 	}
 }

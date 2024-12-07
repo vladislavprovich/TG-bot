@@ -58,7 +58,7 @@ func main() {
 	defer cancel()
 
 	go handler.ProcessUpdates(ctx, bot, buttonHandler, messageHandler, logger)
-
+	//todo
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop

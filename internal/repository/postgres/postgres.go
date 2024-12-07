@@ -26,8 +26,6 @@ func PrepareConnection(ctx context.Context, config Config, logger *logrus.Logger
 	ctxPing, cancelPing := context.WithTimeout(ctx, 5*time.Second)
 	defer cancelPing()
 
-	fmt.Printf("config %v", config)
-
 	if err = db.PingContext(ctxPing); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}

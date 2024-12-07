@@ -138,9 +138,8 @@ func (s *Service) CreateUserByTgID(ctx context.Context, req models.CreateNewUser
 	}
 
 	userID := uuid.New().String()
-	req.UserID = userID
 
-	saveUserReq := s.convertToUser.converterToNewUser(req)
+	saveUserReq := s.convertToUser.converterToNewUser(req, userID)
 
 	err = s.repoUser.SaveUser(ctx, saveUserReq)
 	if err != nil {

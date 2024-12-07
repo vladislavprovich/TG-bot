@@ -9,12 +9,12 @@ services:
       - SERVER_PORT
       - BASE_URL
       - BASE_GET_URL
-      - DATABASE_URL=postgres://postgres:password@db:5432/tgbot?sslmode=disable
+      - DATABASE_URL=postgres://postgres:password@localhost:5433/tgbot?sslmode=disable
       - LOG_LEVEL=development
     depends_on:
-      - db
+      - localhost
 
-  db:
+  localhost:
     image: postgres:12
     platform: linux/amd64
     environment:
@@ -27,7 +27,7 @@ services:
       - db-data:/var/lib/postgresql/data
       - ./db:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
 volumes:
   db-data:
