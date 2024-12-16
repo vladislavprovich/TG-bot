@@ -16,5 +16,5 @@ type GetUserByTgIDRequest struct {
 }
 
 type GetUserByTgIDResponse struct {
-	user *User
+	User *User
 }

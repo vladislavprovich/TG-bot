@@ -36,8 +36,8 @@ type DeleteShortUrl struct {
 }
 
 type GetListRequest struct {
-	TgID int64  `json:"tg_id"`
-	ID   string `json:"id"`
+	TgID   int64  `json:"tg_id"`
+	UserID string `json:"user_id"`
 }
 
 type GetListResponse struct {
@@ -51,7 +51,7 @@ type DeleteAllUrl struct {
 }
 
 type CreateNewUserRequest struct {
-	TgID     int64  `json:"tg_id"`
-	UserID   string `json:"user_id"`
+	TgID int64 `json:"tg_id"`
+	//UserID   string `json:"user_id"`
 	UserName string `json:"username"`
 }

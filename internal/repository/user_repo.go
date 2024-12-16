@@ -59,5 +59,5 @@ func (u *userRepo) GetUserByTgID(ctx context.Context, req *GetUserByTgIDRequest)
 		u.logger.Errorf("Failed to get user by Telegram ID: %v", err)
 		return nil, fmt.Errorf("error retrieving user: %w", err)
 	}
-	return &GetUserByTgIDResponse{user: &user}, nil
+	return &GetUserByTgIDResponse{User: &user}, nil
 }

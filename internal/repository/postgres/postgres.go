@@ -45,7 +45,7 @@ func ensureTables(ctx context.Context, db *sql.DB, cfg Config, logger *logrus.Lo
 		// Create Users table
 		`
     CREATE TABLE IF NOT EXISTS users (
-        user_id SERIAL PRIMARY KEY,
+        user_id UUID PRIMARY KEY,
         telegram_id BIGINT UNIQUE NOT NULL,
         username VARCHAR(100) UNIQUE NOT NULL
     );
@@ -54,7 +54,7 @@ func ensureTables(ctx context.Context, db *sql.DB, cfg Config, logger *logrus.Lo
 		`
     CREATE TABLE IF NOT EXISTS urls (
         url_id SERIAL PRIMARY KEY,
-        user_id INT NOT NULL,
+        user_id UUID NOT NULL,
         original_url TEXT NOT NULL,
         short_url VARCHAR(255) UNIQUE NOT NULL,
         created_at TIMESTAMP,

@@ -36,7 +36,7 @@ func (r *urlRepository) SaveURL(ctx context.Context, req *SaveUrlRequest) error 
 
 func (r *urlRepository) GetListURL(ctx context.Context, req *GetListURLRequest) ([]*URLCombined, error) {
 	query := `SELECT original_url, short_url FROM urls WHERE user_id = $1`
-	rows, err := r.db.QueryContext(ctx, query, req.TgID)
+	rows, err := r.db.QueryContext(ctx, query, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -65,19 +65,20 @@ func (r *urlRepository) GetListURL(ctx context.Context, req *GetListURLRequest) 
 
 func (r *urlRepository) DeleteAllURL(ctx context.Context, req *DeleteAllURLRequest) error {
 	query := `DELETE FROM urls WHERE user_id = $1`
-	_, err := r.db.ExecContext(ctx, query, req.TgID)
+	_, err := r.db.ExecContext(ctx, query, req.UserID)
 	if err != nil {
-		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.TgID, err)
+		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.UserID, err)
 		return err
 	}
 	return nil
 }
 
 func (r *urlRepository) DeleteURL(ctx context.Context, req *DeleteURLRequest) error {
-	query := `DELETE FROM urls WHERE (user_id = $1 AND original_url = $2)`
-	_, err := r.db.ExecContext(ctx, query, req.TgID, req.OriginalURL)
+	query := `DELETE FROM urls WHERE (user_id = $1 AND short_url = $2 AND original_url = $3)`
+	_, err := r.db.ExecContext(ctx, query, req.UserID, req.ShortURL, req.OriginalURL)
+	r.logger.Errorf("DELETE WORKKKK", req.UserID, req.ShortURL, req.OriginalURL)
 	if err != nil {
-		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.TgID, err)
+		r.logger.Errorf("Failed to delete URLs for user %s: %v", req.UserID, err)
 		return err
 	}
 	return nil

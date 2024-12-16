@@ -12,10 +12,10 @@ services:
       - DATABASE_URL=postgres://postgres:password@localhost:5433/tgbot?sslmode=disable
       - LOG_LEVEL=development
     depends_on:
-      - localhost
+      - db
 
-  localhost:
-    image: postgres:12
+  db:
+    image: postgres:13
     platform: linux/amd64
     environment:
       POSTGRES_USER: postgres
