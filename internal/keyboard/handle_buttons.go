@@ -21,7 +21,6 @@ const (
 	Settings       = "settings"
 	BackMainMenu   = "back_to_main"
 	ClearHistory   = "clear_history"
-	DeleteShort    = "delete_short_url"
 )
 
 // todo redis ?
@@ -64,6 +63,31 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 		return
 	}
 
+	if strings.HasPrefix(query.Data, "delete_short_url:") {
+		shortUrl := strings.TrimPrefix(query.Data, "delete_short_url:")
+		h.logger.Infof("Received callback to delete short URL: %s", shortUrl)
+
+		if err = h.service.DeleteShortUrl(ctx, models.DeleteShortUrl{TgID: tgID, UserID: userID, ShortUrl: shortUrl}); err != nil {
+			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Failed to delete URL.")
+			msg.ReplyMarkup = BackMenu()
+			bot.Send(msg)
+			return
+		}
+
+		urls, err := h.service.GetListUrl(ctx, models.GetListRequest{UserID: userID, TgID: tgID})
+		if err != nil || len(urls) == 0 {
+			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "All URLs have been deleted.")
+			msg.ReplyMarkup = BackMenu()
+			bot.Send(msg)
+			return
+		}
+
+		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Your URLs:")
+		msg.ReplyMarkup = CreateURLListWithDeleteButtons(urls)
+		bot.Send(msg)
+		return
+	}
+
 	switch query.Data {
 	case CreateShortURL:
 		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Choose an action from the menu.")
@@ -88,7 +112,7 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 			bot.Send(msg)
 			return
 		}
-		h.logger.Errorf("OHYGOYFUFGYGOUVTUYOHUIHYUUFY URL list: %v", urls)
+
 		if len(urls) == 0 {
 			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "You have no short URLs.")
 			msg.ReplyMarkup = BackMenu()
@@ -119,27 +143,7 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "History cleared.")
 		msg.ReplyMarkup = BackMenu()
 		bot.Send(msg)
-
-	case DeleteShort:
-		shortUrl := strings.TrimPrefix(query.Data, "delete_short_url:")
-		h.logger.Errorf("DELETE SHORT ---- > %v", shortUrl)
-		if err := h.service.DeleteShortUrl(ctx, models.DeleteShortUrl{TgID: tgID, UserID: userID /*, ShortUrl: shortUrl*/}); err != nil {
-			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Failed to delete URL.")
-			bot.Send(msg)
-			return
-		}
-		h.logger.Errorf("DELETE НАЖАЛИ НАХУЙ")
-		urls, err := h.service.GetListUrl(ctx, models.GetListRequest{UserID: userID, TgID: tgID})
-		if err != nil || len(urls) == 0 {
-			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "All URLs have been deleted.")
-			bot.Send(msg)
-			return
-		}
-		h.logger.Errorf("ЗАЛУПУ ВЕРНУЛО")
-		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Your URLs:")
-		msg.ReplyMarkup = CreateURLListWithDeleteButtons(urls)
-		bot.Send(msg)
-		//todo
+	//todo
 	case "show_url_stats":
 		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "coming soon:")
 		msg.ReplyMarkup = BackMenu()
@@ -149,7 +153,6 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 }
 
 func (h *HandleButtons) HandleMessage(ctx context.Context, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
-	//todo
 	if update.Message == nil {
 		h.logger.Info("Message is nil, skipping update.")
 		return
@@ -158,27 +161,6 @@ func (h *HandleButtons) HandleMessage(ctx context.Context, bot *tgbotapi.BotAPI,
 	tgID := update.Message.From.ID
 	messageText := update.Message.Text
 	var userID string
-	if messageText == Start {
-		createUserReq := models.CreateNewUserRequest{
-			//UserID:   "",
-			TgID:     tgID,
-			UserName: update.Message.From.UserName,
-		}
-		var err error
-		userID, err = h.service.CreateUserByTgID(ctx, createUserReq)
-		if err != nil {
-			if !errors.Is(err, sql.ErrNoRows) {
-				h.logger.Errorf("Failed to create user: %v", err)
-				h.logger.Errorf("USER ID: %v", userID)
-			}
-		}
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Welcome to the bot! Choose an action from the menu.")
-		msg.ReplyMarkup = MainMenu()
-		if _, err = bot.Send(msg); err != nil {
-			h.logger.Errorf("Failed to send start message: %v", err)
-		}
-		return
-	}
 
 	user, exists := userStates[tgID]
 	if !exists {
@@ -194,6 +176,27 @@ func (h *HandleButtons) HandleMessage(ctx context.Context, bot *tgbotapi.BotAPI,
 	}
 
 	switch user.Action {
+	case Start:
+		if messageText == Start {
+			createUserReq := models.CreateNewUserRequest{
+				TgID:     tgID,
+				UserName: update.Message.From.UserName,
+			}
+			var err error
+			userID, err = h.service.CreateUserByTgID(ctx, createUserReq)
+			if err != nil {
+				if !errors.Is(err, sql.ErrNoRows) {
+					h.logger.Errorf("Failed to create user: %v", err)
+					h.logger.Errorf("USER ID: %v", userID)
+				}
+			}
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Welcome to the bot! Choose an action from the menu.")
+			msg.ReplyMarkup = MainMenu()
+			if _, err = bot.Send(msg); err != nil {
+				h.logger.Errorf("Failed to send start message: %v", err)
+			}
+			return
+		}
 	case RandomURL:
 		req := models.CreateShortUrlRequest{
 			TgID:        tgID,

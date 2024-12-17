@@ -7,9 +7,11 @@ import (
 	"github.com/vladislavprovich/TG-bot/internal/keyboard"
 )
 
+const TimeUpdate = 60
+
 func ProcessUpdates(ctx context.Context, bot *tgbotapi.BotAPI, buttonHandler *keyboard.HandleButtons, messageHandler *keyboard.HandleButtons, logger *logrus.Logger) {
 	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
+	u.Timeout = TimeUpdate
 
 	updates := bot.GetUpdatesChan(u)
 

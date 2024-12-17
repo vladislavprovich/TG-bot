@@ -60,19 +60,15 @@ func CreateURL() *tgbotapi.InlineKeyboardMarkup {
 
 func CreateURLListWithDeleteButtons(urls []*models.GetListResponse) *tgbotapi.InlineKeyboardMarkup {
 	var rows [][]tgbotapi.InlineKeyboardButton
-	logger.Errorf("ХУЙНЯ РАБОТАЙ")
 	for _, url := range urls {
-
-		callbackData := fmt.Sprintf("delete_short_url:%s", url.ShortUrl)
-		logger.Errorf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA %s", callbackData)
 
 		NameOrig := OriginalInfo(url.OriginalUrl)
 		NameShort := ShortInfo(url.ShortUrl)
 
 		row := tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", NameOrig), "ignore"), // button no usage
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", NameShort), "ignore"),
-			tgbotapi.NewInlineKeyboardButtonData("Delete", "delete_short_url"), //todo THIS IS PROBLEM
+			tgbotapi.NewInlineKeyboardButtonURL(fmt.Sprintf("%s", NameOrig), url.OriginalUrl),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", NameShort), "ignore"), // button no usage. TG Api block localhost
+			tgbotapi.NewInlineKeyboardButtonData("Delete", fmt.Sprintf("delete_short_url:%s", url.ShortUrl)),
 		)
 		rows = append(rows, row)
 	}

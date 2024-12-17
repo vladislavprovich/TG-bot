@@ -15,6 +15,6 @@ func (c *converterToTgID) converterToTgID(
 	TgID int64,
 ) *repository.GetUserByTgIDRequest {
 	return &repository.GetUserByTgIDRequest{
-		TgID,
+		TgID: TgID,
 	}
 }

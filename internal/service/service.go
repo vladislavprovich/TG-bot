@@ -64,15 +64,11 @@ func (s *Service) CreateShortUrl(ctx context.Context, req models.CreateShortUrlR
 		if err != nil {
 			return models.CreateShortUrlResponse{}, err
 		}
-		s.logger.Errorf("user id check", userIDresp.User.UserID)
+		s.logger.Infof("user id check %s", userIDresp.User.UserID)
 		req.UserID = userIDresp.User.UserID
 	}
 	existingUrls, err := s.repo.GetListURL(ctx, &repository.GetListURLRequest{UserID: req.UserID})
 	if err != nil {
-		s.logger.Errorf("TG ID", req.TgID)
-		s.logger.Errorf("User ID", req.UserID)
-		s.logger.Errorf("Orig URLs", req.OriginalUrl)
-		s.logger.Errorf("Custom", req.CustomAlias)
 		s.logger.Errorf("failed to check existing URLs: %v", err)
 		return models.CreateShortUrlResponse{}, err
 	}
@@ -105,8 +101,8 @@ func (s *Service) CreateShortUrl(ctx context.Context, req models.CreateShortUrlR
 func (s *Service) GetListUrl(ctx context.Context, ID models.GetListRequest) ([]*models.GetListResponse, error) {
 	userID, err := s.repoUser.GetUserByTgID(ctx, &repository.GetUserByTgIDRequest{TgID: ID.TgID})
 	userID.User.UserID = ID.UserID
+
 	urls, err := s.repo.GetListURL(ctx, &repository.GetListURLRequest{UserID: ID.UserID})
-	s.logger.Errorf("DDDDDDDDDD USERID", ID.UserID)
 	if err != nil {
 		s.logger.Errorf("failed to get list of URLs: %v", err)
 		return nil, err
@@ -118,7 +114,6 @@ func (s *Service) GetListUrl(ctx context.Context, ID models.GetListRequest) ([]*
 			OriginalUrl: url.OriginalURL,
 			ShortUrl:    url.ShortURL,
 		})
-		s.logger.Errorf("UUUUUUUUUUUUUUUUUUUUUUUU", response)
 	}
 	return response, nil
 }
@@ -126,14 +121,11 @@ func (s *Service) GetListUrl(ctx context.Context, ID models.GetListRequest) ([]*
 func (s *Service) DeleteShortUrl(ctx context.Context, url models.DeleteShortUrl) error {
 	userID, err := s.repoUser.GetUserByTgID(ctx, &repository.GetUserByTgIDRequest{TgID: url.TgID})
 	userID.User.UserID = url.UserID
-	s.logger.Errorf("ID USEWR IN DELEEEEEEEEEt", url.UserID)
 	err = s.repo.DeleteURL(ctx, &repository.DeleteURLRequest{
-		//TgID:        url.TgID,
 		UserID:      url.UserID,
 		OriginalURL: url.OriginalUrl,
 		ShortURL:    url.ShortUrl,
 	})
-	s.logger.Errorf("CAAAAAAALLL 111111111")
 	if err != nil {
 		s.logger.Errorf("failed to delete short URL: %v", err)
 		return err
@@ -160,16 +152,14 @@ func (s *Service) CreateUserByTgID(ctx context.Context, req models.CreateNewUser
 
 	userResp, err := s.repoUser.GetUserByTgID(ctx, reqNew)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return "", fmt.Errorf("error checking user existence: %w", err)
+		return "", fmt.Errorf("DataBase Error")
+		s.logger.Errorf("error checking user existence: %w", err)
 	}
 
-	s.logger.Errorf("DEBUG!!!! = %s", userResp.User.UserID)
 	if userResp != nil {
-		s.logger.Errorf("DEBUG!!!! CALL 123")
 		s.logger.Errorf("INFO ERROR", userResp.User.UserID)
 		return userResp.User.UserID, nil
 	}
-	s.logger.Errorf("DEBUG!!!! CALL 222")
 	userID := uuid.New().String()
 
 	saveUserReq := s.convertToUser.converterToNewUser(req, userID)
