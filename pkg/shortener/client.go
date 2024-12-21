@@ -42,13 +42,13 @@ func (c *BasicClient) CreateShortUrl(ctx context.Context, req *CreateShortURLReq
 		c.logger.Errorf("error marshalling request: %w", err)
 	}
 
-	urlPost := &url.URL{
+	urlForCreateShortUrl := &url.URL{
 		Scheme: "http",
 		Host:   fmt.Sprintf("%s:%s", c.config.BaseURL, c.config.Port),
 		Path:   shorten,
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, urlPost.String(), bytes.NewBuffer(jsonReq))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, urlForCreateShortUrl.String(), bytes.NewBuffer(jsonReq))
 	if err != nil {
 		return nil, fmt.Errorf("Service error")
 		c.logger.Errorf("failed to create request: %w", err)
@@ -90,13 +90,13 @@ func (c *BasicClient) CreateShortUrl(ctx context.Context, req *CreateShortURLReq
 }
 
 func (c *BasicClient) GetStatsUrl(ctx context.Context, req *GetShortURLStatsRequest) (*GetShortURLStatsResponse, error) {
-	urlGet := &url.URL{
+	urlForGetStatus := &url.URL{
 		Scheme: "http",
 		Host:   fmt.Sprintf("%s:%s", c.config.BaseURL, c.config.Port),
 		Path:   fmt.Sprintf("%s/%s", req.ShortURL, stats),
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, urlGet.String(), nil)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, urlForGetStatus.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("Service error")
 		c.logger.Errorf("failed to create request: %w", err)

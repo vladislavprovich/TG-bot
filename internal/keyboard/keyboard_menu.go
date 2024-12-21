@@ -59,12 +59,12 @@ func CreateURLListWithDeleteButtons(urls []*models.GetListResponse) *tgbotapi.In
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, url := range urls {
 
-		NameOrig := pkg.OriginalInfo(url.OriginalUrl)
-		NameShort := pkg.ShortInfo(url.ShortUrl)
+		redactionOriginalUrl := pkg.OriginalInfo(url.OriginalUrl) //only original url. Example: "http://google.com/qwerty" --> "google.com"
+		redactionShortUrl := pkg.ShortInfo(url.ShortUrl)          //only short url. Example: "http://host:1111/qwerty" --> "qwerty"
 
 		row := tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonURL(fmt.Sprintf("%s", NameOrig), url.OriginalUrl),
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", NameShort), "ignore"), // button no usage. TG Api block localhost
+			tgbotapi.NewInlineKeyboardButtonURL(fmt.Sprintf("%s", redactionOriginalUrl), url.OriginalUrl),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", redactionShortUrl), "ignore"), // button no usage. TG Api block localhost
 			tgbotapi.NewInlineKeyboardButtonData("Delete", fmt.Sprintf("delete_short_url:%s", url.ShortUrl)),
 		)
 		rows = append(rows, row)
@@ -81,7 +81,7 @@ func CreateURLListWithDeleteButtons(urls []*models.GetListResponse) *tgbotapi.In
 func CreateURLStatusButton(stats []*models.GetUrlStatusResponse) *tgbotapi.InlineKeyboardMarkup {
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, url := range stats {
-		NameShort := pkg.ShortInfo(url.ShortUrl) //only short url. Example: "http://host:1111/qwerty" --> "qwerty"
+		redactionShortUrl := pkg.ShortInfo(url.ShortUrl) //only short url. Example: "http://host:1111/qwerty" --> "qwerty"
 		regi := strconv.Itoa(url.RedirectCount)
 
 		datePart := url.CreatedAt.Format("2006-01-02")
@@ -89,7 +89,7 @@ func CreateURLStatusButton(stats []*models.GetUrlStatusResponse) *tgbotapi.Inlin
 		formatDate := datePart + "\n" + timePart
 
 		row := tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", NameShort), "ignore"), // button no usage. TG Api block localhost
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", redactionShortUrl), "ignore"), // button no usage. TG Api block localhost
 			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", formatDate), "ignore"),
 			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", regi), "ignore"),
 		)
