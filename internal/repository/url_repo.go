@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/sirupsen/logrus"
 )
 
@@ -11,6 +12,7 @@ type URLRepository interface {
 	GetListURL(ctx context.Context, req *GetListURLRequest) ([]*URLCombined, error)
 	DeleteAllURL(ctx context.Context, req *DeleteAllURLRequest) error
 	DeleteURL(ctx context.Context, req *DeleteURLRequest) error
+	GetUrlStats(ctx context.Context, req *GetUrlStatsRequest) ([]*GetUrlStatsResponse, error)
 }
 
 type urlRepository struct {
@@ -81,4 +83,33 @@ func (r *urlRepository) DeleteURL(ctx context.Context, req *DeleteURLRequest) er
 		return err
 	}
 	return nil
+}
+
+func (r *urlRepository) GetUrlStats(ctx context.Context, req *GetUrlStatsRequest) ([]*GetUrlStatsResponse, error) {
+	query := `SELECT short_url, created_at, redirect_count FROM urls WHERE user_id = $1 AND  short_url = $2`
+	rows, err := r.db.QueryContext(ctx, query, req.UserID, req.ShortURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query URL stats: %w", err)
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			r.logger.Errorf("rows.Close(): %v", err)
+		}
+	}()
+
+	var stats []*GetUrlStatsResponse
+	for rows.Next() {
+		var stat GetUrlStatsResponse
+		if err := rows.Scan(&stat.ShortURL, &stat.CreatedAt, &stat.RedirectCount); err != nil {
+			return nil, fmt.Errorf("failed to scan URL stats: %w", err)
+		}
+		stats = append(stats, &stat)
+	}
+
+	if err := rows.Err(); err != nil {
+		r.logger.Errorf("rows.Err(): %v", err)
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return stats, nil
 }

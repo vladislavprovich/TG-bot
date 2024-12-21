@@ -21,6 +21,7 @@ const (
 	Settings       = "settings"
 	BackMainMenu   = "back_to_main"
 	ClearHistory   = "clear_history"
+	ShowUrlStatus  = "show_url_stats"
 )
 
 // todo redis ?
@@ -144,9 +145,16 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 		msg.ReplyMarkup = BackMenu()
 		bot.Send(msg)
 	//todo
-	case "show_url_stats":
-		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "coming soon:")
-		msg.ReplyMarkup = BackMenu()
+	case ShowUrlStatus:
+		stats, err := h.service.GetUrlStatus(ctx, models.GetUrlStatusRequest{UserID: userID, TgID: tgID})
+		if err != nil || len(stats) == 0 {
+			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Error retrieving URL stats.")
+			msg.ReplyMarkup = BackMenu()
+			bot.Send(msg)
+			return
+		}
+		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Your URLs stats:")
+		msg.ReplyMarkup = CreateURLStatusButton(stats)
 		bot.Send(msg)
 	}
 
