@@ -3,13 +3,10 @@ package keyboard
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sirupsen/logrus"
 	"github.com/vladislavprovich/TG-bot/internal/models"
 	"github.com/vladislavprovich/TG-bot/pkg"
 	"strconv"
 )
-
-var logger logrus.Logger
 
 func MainMenu() *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
