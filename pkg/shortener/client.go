@@ -8,6 +8,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"net/url"
+)
+
+const (
+	shorten = "shorten"
+	stats   = "stats"
 )
 
 type BasicClient struct {
@@ -36,7 +42,13 @@ func (c *BasicClient) CreateShortUrl(ctx context.Context, req *CreateShortURLReq
 		c.logger.Errorf("error marshalling request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.config.BaseURL, bytes.NewBuffer(jsonReq))
+	urlPost := &url.URL{
+		Scheme: "http",
+		Host:   fmt.Sprintf("%s:%s", c.config.BaseURL, c.config.Port),
+		Path:   shorten,
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, urlPost.String(), bytes.NewBuffer(jsonReq))
 	if err != nil {
 		return nil, fmt.Errorf("Service error")
 		c.logger.Errorf("failed to create request: %w", err)
@@ -78,13 +90,13 @@ func (c *BasicClient) CreateShortUrl(ctx context.Context, req *CreateShortURLReq
 }
 
 func (c *BasicClient) GetStatsUrl(ctx context.Context, req *GetShortURLStatsRequest) (*GetShortURLStatsResponse, error) {
-	jsonReq, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("Service error")
-		c.logger.Errorf("error marshalling request: %w", err)
+	urlGet := &url.URL{
+		Scheme: "http",
+		Host:   fmt.Sprintf("%s:%s", c.config.BaseURL, c.config.Port),
+		Path:   fmt.Sprintf("%s/%s", req.ShortURL, stats),
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, c.config.BaseGetURL, bytes.NewBuffer(jsonReq))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, urlGet.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("Service error")
 		c.logger.Errorf("failed to create request: %w", err)

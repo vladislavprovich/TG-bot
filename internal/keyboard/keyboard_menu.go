@@ -5,8 +5,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 	"github.com/vladislavprovich/TG-bot/internal/models"
-	"net/url"
-	"strings"
+	"github.com/vladislavprovich/TG-bot/pkg"
+	"strconv"
 )
 
 var logger logrus.Logger
@@ -62,8 +62,8 @@ func CreateURLListWithDeleteButtons(urls []*models.GetListResponse) *tgbotapi.In
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, url := range urls {
 
-		NameOrig := OriginalInfo(url.OriginalUrl)
-		NameShort := ShortInfo(url.ShortUrl)
+		NameOrig := pkg.OriginalInfo(url.OriginalUrl)
+		NameShort := pkg.ShortInfo(url.ShortUrl)
 
 		row := tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL(fmt.Sprintf("%s", NameOrig), url.OriginalUrl),
@@ -81,31 +81,28 @@ func CreateURLListWithDeleteButtons(urls []*models.GetListResponse) *tgbotapi.In
 	return &tgbotapi.InlineKeyboardMarkup{InlineKeyboard: rows}
 }
 
-func OriginalInfo(OriginalURL string) string {
-	extractDomain := func(link string) string {
-		parsedUrl, err := url.Parse(link)
-		if err != nil {
-			logger.Errorf("Error Pasr URL: %s", err)
-			return link
-		}
-		return parsedUrl.Hostname()
-	}
-	NameOrig := extractDomain(OriginalURL)
-	return NameOrig
-}
+func CreateURLStatusButton(stats []*models.GetUrlStatusResponse) *tgbotapi.InlineKeyboardMarkup {
+	var rows [][]tgbotapi.InlineKeyboardButton
+	for _, url := range stats {
+		NameShort := pkg.ShortInfo(url.ShortUrl) //only short url. Example: "http://host:1111/qwerty" --> "qwerty"
+		regi := strconv.Itoa(url.RedirectCount)
 
-func ShortInfo(ShortUrl string) string {
-	extractLastSegment := func(link string) string {
-		parsedUrl, err := url.Parse(link)
-		if err != nil {
-			return link
-		}
-		pathSegments := strings.Split(parsedUrl.Path, "/")
-		if len(pathSegments) > 0 {
-			return pathSegments[len(pathSegments)-1]
-		}
-		return ""
+		datePart := url.CreatedAt.Format("2006-01-02")
+		timePart := url.CreatedAt.Format("15:04")
+		formatDate := datePart + "\n" + timePart
+
+		row := tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", NameShort), "ignore"), // button no usage. TG Api block localhost
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", formatDate), "ignore"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", regi), "ignore"),
+		)
+		rows = append(rows, row)
 	}
-	NameShort := extractLastSegment(ShortUrl)
-	return NameShort
+
+	backRow := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Back", "back_to_main"),
+	)
+	rows = append(rows, backRow)
+
+	return &tgbotapi.InlineKeyboardMarkup{InlineKeyboard: rows}
 }

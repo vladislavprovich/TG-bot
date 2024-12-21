@@ -6,15 +6,13 @@ import (
 )
 
 type Config struct {
-	Port       string `envconfig:"SERVER_PORT" `
-	BaseURL    string `envconfig:"BASE_URL" `
-	BaseGetURL string `envconfig:"BASE_GET_URL"`
+	Port    string `envconfig:"SERVER_PORT" `
+	BaseURL string `envconfig:"BASE_URL" `
 }
 
 func (c Config) ValidateWithContext(ctx context.Context) error {
 	return validation.ValidateStructWithContext(ctx, &c,
 		validation.Field(&c.Port, validation.Required),
 		validation.Field(&c.BaseURL, validation.Required),
-		validation.Field(&c.BaseGetURL, validation.Required),
 	)
 }

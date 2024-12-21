@@ -145,8 +145,15 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 		bot.Send(msg)
 	//todo
 	case "show_url_stats":
-		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "coming soon:")
-		msg.ReplyMarkup = BackMenu()
+		stats, err := h.service.GetUrlStatus(ctx, models.GetUrlStatusRequest{UserID: userID, TgID: tgID})
+		if err != nil || len(stats) == 0 {
+			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Error retrieving URL stats.")
+			msg.ReplyMarkup = BackMenu()
+			bot.Send(msg)
+			return
+		}
+		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Your URLs stats:")
+		msg.ReplyMarkup = CreateURLStatusButton(stats)
 		bot.Send(msg)
 	}
 

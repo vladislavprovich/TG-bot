@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vladislavprovich/TG-bot/internal/models"
 	"github.com/vladislavprovich/TG-bot/internal/repository"
+	"github.com/vladislavprovich/TG-bot/pkg"
 	"github.com/vladislavprovich/TG-bot/pkg/shortener"
 )
 
@@ -18,19 +19,20 @@ type UrlService interface {
 	DeleteShortUrl(ctx context.Context, url models.DeleteShortUrl) error
 	DeleteAllUrl(ctx context.Context, ID models.DeleteAllUrl) error
 	CreateUserByTgID(ctx context.Context, req models.CreateNewUserRequest) (string, error)
-	//todo URL stats
+	GetUrlStatus(ctx context.Context, req models.GetUrlStatusRequest) ([]*models.GetUrlStatusResponse, error)
 }
 
 type (
 	Service struct {
-		client             shortener.Client
-		repo               repository.URLRepository
-		repoUser           repository.UserRepository
-		logger             *logrus.Logger
-		convertToShortener *converterToShortener
-		convertToStorage   *converterToStorage
-		convertToUser      *converterToUser
-		convertToTgID      *converterToTgID
+		client              shortener.Client
+		repo                repository.URLRepository
+		repoUser            repository.UserRepository
+		logger              *logrus.Logger
+		convertToShortener  *converterToShortener
+		convertToStorage    *converterToStorage
+		convertToUser       *converterToUser
+		convertToTgID       *converterToTgID
+		converterToGetStats *converterToGetStats
 	}
 
 	Params struct {
@@ -43,14 +45,15 @@ type (
 
 func NewService(params Params) UrlService {
 	return &Service{
-		client:             params.Client,
-		repo:               params.Repo,
-		repoUser:           params.RepoUser,
-		logger:             params.Logger,
-		convertToShortener: NewConverterToShortener(),
-		convertToStorage:   NewConverterToStorage(),
-		convertToUser:      NewConverterToUser(),
-		convertToTgID:      NewConverterToTgID(),
+		client:              params.Client,
+		repo:                params.Repo,
+		repoUser:            params.RepoUser,
+		logger:              params.Logger,
+		convertToShortener:  NewConverterToShortener(),
+		convertToStorage:    NewConverterToStorage(),
+		convertToUser:       NewConverterToUser(),
+		convertToTgID:       NewConverterToTgID(),
+		converterToGetStats: NewConverterToGetStats(),
 	}
 }
 
@@ -102,14 +105,14 @@ func (s *Service) GetListUrl(ctx context.Context, ID models.GetListRequest) ([]*
 	userID, err := s.repoUser.GetUserByTgID(ctx, &repository.GetUserByTgIDRequest{TgID: ID.TgID})
 	userID.User.UserID = ID.UserID
 
-	urls, err := s.repo.GetListURL(ctx, &repository.GetListURLRequest{UserID: ID.UserID})
+	urlsRes, err := s.repo.GetListURL(ctx, &repository.GetListURLRequest{UserID: ID.UserID})
 	if err != nil {
 		s.logger.Errorf("failed to get list of URLs: %v", err)
 		return nil, err
 	}
 
 	var response []*models.GetListResponse
-	for _, url := range urls {
+	for _, url := range urlsRes {
 		response = append(response, &models.GetListResponse{
 			OriginalUrl: url.OriginalURL,
 			ShortUrl:    url.ShortURL,
@@ -171,4 +174,47 @@ func (s *Service) CreateUserByTgID(ctx context.Context, req models.CreateNewUser
 	}
 
 	return saveUserReq.UserID, nil
+}
+
+func (s *Service) GetUrlStatus(ctx context.Context, req models.GetUrlStatusRequest) ([]*models.GetUrlStatusResponse, error) {
+	userID, err := s.repoUser.GetUserByTgID(ctx, &repository.GetUserByTgIDRequest{TgID: req.TgID})
+	if err != nil {
+		s.logger.Errorf("failed to get user ID for TG ID %d: %v", req.TgID, err)
+		return nil, fmt.Errorf("user ID check error: %w", err)
+	}
+	req.UserID = userID.User.UserID
+
+	urls, err := s.repo.GetListURL(ctx, &repository.GetListURLRequest{TgID: req.TgID, UserID: req.UserID})
+	if err != nil {
+		s.logger.Errorf("failed to get list of URLs for user ID %s: %v", req.UserID, err)
+		return nil, err
+	}
+
+	var responses []*models.GetUrlStatusResponse
+
+	for _, url := range urls {
+		shortInfoUrls := pkg.ShortInfo(url.ShortURL)
+		statsReq := &shortener.GetShortURLStatsRequest{
+			ShortURL: shortInfoUrls,
+		}
+
+		stats, err := s.client.GetStatsUrl(ctx, statsReq)
+		if err != nil {
+			s.logger.Errorf("failed to get stats for short URL %s: %v", shortInfoUrls, err)
+			return nil, err
+		}
+
+		responses = append(responses, &models.GetUrlStatusResponse{
+			ShortUrl:      shortInfoUrls,
+			RedirectCount: stats.RedirectCount,
+			CreatedAt:     stats.CreatedAt,
+		})
+	}
+
+	if len(responses) == 0 {
+		s.logger.Warnf("no valid stats found for user ID %s", req.UserID)
+		return nil, fmt.Errorf("no valid stats found for user URLs")
+	}
+
+	return responses, nil
 }

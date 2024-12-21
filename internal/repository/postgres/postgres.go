@@ -57,6 +57,7 @@ func ensureTables(ctx context.Context, db *sql.DB, cfg Config, logger *logrus.Lo
         user_id UUID NOT NULL,
         original_url TEXT NOT NULL,
         short_url VARCHAR(255) UNIQUE NOT NULL,
+        redirect_count INT,
         created_at TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
     );

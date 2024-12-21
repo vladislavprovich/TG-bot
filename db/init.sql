@@ -9,5 +9,6 @@ CREATE TABLE urls (
         user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
         original_url TEXT NOT NULL,
         short_url VARCHAR(255) UNIQUE NOT NULL,
+        redirect_count INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
