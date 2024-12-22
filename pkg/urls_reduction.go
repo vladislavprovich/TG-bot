@@ -17,8 +17,8 @@ func ShortInfo(ShortUrl string) string {
 		}
 		return ""
 	}
-	NameShort := extractLastSegment(ShortUrl)
-	return NameShort
+	nameShort := extractLastSegment(ShortUrl)
+	return nameShort
 }
 
 func OriginalInfo(OriginalURL string) string {
@@ -29,6 +29,6 @@ func OriginalInfo(OriginalURL string) string {
 		}
 		return parsedUrl.Hostname()
 	}
-	NameOrig := extractDomain(OriginalURL)
-	return NameOrig
+	nameOrig := extractDomain(OriginalURL)
+	return nameOrig
 }
