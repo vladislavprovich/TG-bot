@@ -28,7 +28,7 @@ func main() {
 	logger := logger.NewLogger(cfg.Logger)
 	db, err := postgres.PrepareConnection(ctx, cfg.Database, logger)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalf("Data base error: %v", err)
 	}
 
 	httpClient := &http.Client{
@@ -36,17 +36,15 @@ func main() {
 	}
 
 	client := shortener.NewBasicClient(cfg.Client, httpClient, logger)
-
-	UrlRepo := repository.NewBotRepository(db, logger)
-	UserRepo := repository.NewUserRepository(db, logger)
+	urlRepo := repository.NewBotRepository(db, logger)
+	userRepo := repository.NewUserRepository(db, logger)
 
 	params := service.Params{
-		UrlRepo,
-		UserRepo,
+		urlRepo,
+		userRepo,
 		logger,
 		&client,
 	}
-
 	urlService := service.NewService(params)
 
 	buttonHandler := keyboard.NewHandleButtons(urlService, logger)
@@ -56,7 +54,7 @@ func main() {
 	defer cancel()
 
 	go handler.ProcessUpdates(ctx, bot, buttonHandler, messageHandler, logger)
-	//todo
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop

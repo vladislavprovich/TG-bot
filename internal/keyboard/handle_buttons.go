@@ -7,7 +7,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 	"github.com/vladislavprovich/TG-bot/internal/models"
-	"github.com/vladislavprovich/TG-bot/internal/repository"
 	"github.com/vladislavprovich/TG-bot/internal/service"
 	"strings"
 )
@@ -24,13 +23,14 @@ const (
 	ShowUrlStatus  = "show_url_stats"
 )
 
-// todo redis ?
-var userStates = make(map[int64]*models.UserAction)
+var (
+	userStates = make(map[int64]*models.UserAction)
+	urls       []*models.GetListResponse
+)
 
 type HandleButtons struct {
 	service service.UrlService
 	logger  *logrus.Logger
-	repo    *repository.UserRepository
 }
 
 func NewHandleButtons(service service.UrlService, logger *logrus.Logger) *HandleButtons {
@@ -75,8 +75,15 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 			return
 		}
 
-		urls, err := h.service.GetListUrl(ctx, models.GetListRequest{UserID: userID, TgID: tgID})
-		if err != nil || len(urls) == 0 {
+		updatedUrls := []*models.GetListResponse{}
+		for _, url := range urls {
+			if url.ShortUrl != shortUrl {
+				updatedUrls = append(updatedUrls, url)
+			}
+		}
+		urls = updatedUrls
+
+		if len(updatedUrls) == 0 {
 			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "All URLs have been deleted.")
 			msg.ReplyMarkup = BackMenu()
 			bot.Send(msg)
@@ -84,7 +91,7 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 		}
 
 		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Your URLs:")
-		msg.ReplyMarkup = CreateURLListWithDeleteButtons(urls)
+		msg.ReplyMarkup = CreateURLListWithDeleteButtons(updatedUrls)
 		bot.Send(msg)
 		return
 	}
@@ -106,14 +113,13 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 		bot.Send(msg)
 
 	case ListURL:
-		urls, err := h.service.GetListUrl(ctx, models.GetListRequest{UserID: userID, TgID: tgID})
+		urls, err = h.service.GetListUrl(ctx, models.GetListRequest{UserID: userID, TgID: tgID})
 		if err != nil {
 			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "Error retrieving URL list.")
 			msg.ReplyMarkup = BackMenu()
 			bot.Send(msg)
 			return
 		}
-
 		if len(urls) == 0 {
 			msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "You have no short URLs.")
 			msg.ReplyMarkup = BackMenu()
@@ -144,7 +150,6 @@ func (h *HandleButtons) HandleCallbackQuery(ctx context.Context, bot *tgbotapi.B
 		msg := tgbotapi.NewEditMessageText(query.Message.Chat.ID, query.Message.MessageID, "History cleared.")
 		msg.ReplyMarkup = BackMenu()
 		bot.Send(msg)
-	//todo
 	case ShowUrlStatus:
 		stats, err := h.service.GetUrlStatus(ctx, models.GetUrlStatusRequest{UserID: userID, TgID: tgID})
 		if err != nil || len(stats) == 0 {
