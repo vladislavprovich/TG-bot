@@ -8,17 +8,17 @@ import (
 type converterToUser struct {
 }
 
-func NewConverterToUser() *converterToUser {
+func newConverterToUser() *converterToUser {
 	return &converterToUser{}
 }
 
 func (c *converterToUser) converterToNewUser(
 	req models.CreateNewUserRequest,
-	UserID string,
+	userID string,
 ) *repository.SaveUserRequest {
 	return &repository.SaveUserRequest{
 		TgID:     req.TgID,
-		UserID:   UserID,
+		UserID:   userID,
 		UserName: req.UserName,
 	}
 }

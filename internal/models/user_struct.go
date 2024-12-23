@@ -7,34 +7,34 @@ type User struct {
 	ID          string     `json:"id"`
 	TelegramID  string     `json:"telegram_id"`
 	OriginalURL string     `json:"original_url"`
-	CustomUrl   string     `json:"custom_url"`
+	CustomURL   string     `json:"custom_url"`
 	ShortURL    string     `json:"short_url"`
-	userAction  UserAction `json:"user_action"`
+	UserAction  UserAction `json:"user_action"`
 }
 
 type UserAction struct {
 	Action      string `json:"action"` // "rand_url" or "cust_url"
 	OriginalURL string `json:"original_url"`
-	CustomUrl   string `json:"custom_url"`
+	CustomURL   string `json:"custom_url"`
 	ShortURL    string `json:"short_url"`
 }
 
-type CreateShortUrlRequest struct {
+type CreateShortURLRequest struct {
 	TgID        int64   `json:"tg_id"`
 	UserID      string  `json:"user_id"`
-	OriginalUrl string  `json:"original_url"`
+	OriginalURL string  `json:"original_url"`
 	CustomAlias *string `json:"custom_alias,omitempty"`
 }
 
-type CreateShortUrlResponse struct {
-	ShortUrl string `json:"short_url"`
+type CreateShortURLResponse struct {
+	ShortURL string `json:"short_url"`
 }
 
-type DeleteShortUrl struct {
+type DeleteShortURL struct {
 	TgID        int64  `json:"tg_id"`
 	UserID      string `json:"user_id"`
-	OriginalUrl string `json:"original_url"`
-	ShortUrl    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+	ShortURL    string `json:"short_url"`
 }
 
 type GetListRequest struct {
@@ -43,11 +43,11 @@ type GetListRequest struct {
 }
 
 type GetListResponse struct {
-	OriginalUrl string `json:"original_url"`
-	ShortUrl    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+	ShortURL    string `json:"short_url"`
 }
 
-type DeleteAllUrl struct {
+type DeleteAllURL struct {
 	TgID   int64  `json:"tg_id"`
 	UserID string `json:"user_id"`
 }
@@ -57,14 +57,14 @@ type CreateNewUserRequest struct {
 	UserName string `json:"username"`
 }
 
-type GetUrlStatusRequest struct {
+type GetURLStatusRequest struct {
 	UserID   string `json:"user_id"`
 	TgID     int64  `json:"tg_id"`
-	ShortUrl string `json:"short_url"`
+	ShortURL string `json:"short_url"`
 }
 
-type GetUrlStatusResponse struct {
-	ShortUrl      string    `json:"short_url"`
+type GetURLStatusResponse struct {
+	ShortURL      string    `json:"short_url"`
 	RedirectCount int       `json:"redirect_count"`
 	CreatedAt     time.Time `json:"created_at"`
 }

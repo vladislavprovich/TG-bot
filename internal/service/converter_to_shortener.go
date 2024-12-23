@@ -8,15 +8,15 @@ import (
 type converterToShortener struct {
 }
 
-func NewConverterToShortener() *converterToShortener {
+func newConverterToShortener() *converterToShortener {
 	return &converterToShortener{}
 }
 
 func (c *converterToShortener) ConvertToCreateShortURLRequest(
-	req models.CreateShortUrlRequest,
+	req models.CreateShortURLRequest,
 ) *shortener.CreateShortURLRequest {
 	return &shortener.CreateShortURLRequest{
-		URL:         req.OriginalUrl,
+		URL:         req.OriginalURL,
 		CustomAlias: req.CustomAlias,
 	}
 }

@@ -2,10 +2,11 @@ package keyboard
 
 import (
 	"fmt"
+	"strconv"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/vladislavprovich/TG-bot/internal/models"
 	"github.com/vladislavprovich/TG-bot/pkg"
-	"strconv"
 )
 
 func MainMenu() *tgbotapi.InlineKeyboardMarkup {
@@ -58,14 +59,17 @@ func CreateURL() *tgbotapi.InlineKeyboardMarkup {
 func CreateURLListWithDeleteButtons(urls []*models.GetListResponse) *tgbotapi.InlineKeyboardMarkup {
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, url := range urls {
-
-		redactionOriginalUrl := pkg.OriginalInfo(url.OriginalUrl) //only original url. Example: "http://google.com/qwerty" --> "google.com"
-		redactionShortUrl := pkg.ShortInfo(url.ShortUrl)          //only short url. Example: "http://host:1111/qwerty" --> "qwerty"
+		// only original url. Example: "http://google.com/qwerty" --> "google.com"
+		redactionOriginalURL := pkg.OriginalInfo(url.OriginalURL)
+		// only short url. Example: "http://host:1111/qwerty" --> "qwerty"
+		redactionShortURL := pkg.ShortInfo(url.ShortURL)
 
 		row := tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonURL(fmt.Sprintf("%s", redactionOriginalUrl), url.OriginalUrl),
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", redactionShortUrl), "ignore"), // button no usage. TG Api block localhost
-			tgbotapi.NewInlineKeyboardButtonData("Delete", fmt.Sprintf("delete_short_url:%s", url.ShortUrl)),
+			tgbotapi.NewInlineKeyboardButtonURL(redactionOriginalURL, url.OriginalURL),
+			// button no usage. TG Api block localhost
+			tgbotapi.NewInlineKeyboardButtonData(redactionShortURL, "ignore"),
+			tgbotapi.NewInlineKeyboardButtonData("Delete",
+				fmt.Sprintf("delete_short_url:%s", url.ShortURL)),
 		)
 		rows = append(rows, row)
 	}
@@ -78,10 +82,11 @@ func CreateURLListWithDeleteButtons(urls []*models.GetListResponse) *tgbotapi.In
 	return &tgbotapi.InlineKeyboardMarkup{InlineKeyboard: rows}
 }
 
-func CreateURLStatusButton(stats []*models.GetUrlStatusResponse) *tgbotapi.InlineKeyboardMarkup {
+func CreateURLStatusButton(stats []*models.GetURLStatusResponse) *tgbotapi.InlineKeyboardMarkup {
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, url := range stats {
-		redactionShortUrl := pkg.ShortInfo(url.ShortUrl) //only short url. Example: "http://host:1111/qwerty" --> "qwerty"
+		// Only short url. Example: "http://host:1111/qwerty" --> "qwerty".
+		redactionShortURL := pkg.ShortInfo(url.ShortURL)
 		regi := strconv.Itoa(url.RedirectCount)
 
 		datePart := url.CreatedAt.Format("2006-01-02")
@@ -89,9 +94,10 @@ func CreateURLStatusButton(stats []*models.GetUrlStatusResponse) *tgbotapi.Inlin
 		formatDate := datePart + "\n" + timePart
 
 		row := tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", redactionShortUrl), "ignore"), // button no usage. TG Api block localhost
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", formatDate), "ignore"),
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s", regi), "ignore"),
+			// Button no usage. TG Api block localhost.
+			tgbotapi.NewInlineKeyboardButtonData(redactionShortURL, "ignore"),
+			tgbotapi.NewInlineKeyboardButtonData(formatDate, "ignore"),
+			tgbotapi.NewInlineKeyboardButtonData(regi, "ignore"),
 		)
 		rows = append(rows, row)
 	}

@@ -8,19 +8,19 @@ import (
 type converterToStorage struct {
 }
 
-func NewConverterToStorage() *converterToStorage {
+func newConverterToStorage() *converterToStorage {
 	return &converterToStorage{}
 }
 
-func (c *converterToStorage) ConvertToSaveUrlReq(
-	req models.CreateShortUrlRequest,
+func (c *converterToStorage) ConvertToSaveURLReq(
+	req models.CreateShortURLRequest,
 	shortURL string,
 	userID string,
-) *repository.SaveUrlRequest {
-	return &repository.SaveUrlRequest{
+) *repository.SaveURLRequest {
+	return &repository.SaveURLRequest{
 		UserID: userID,
 		URL: &repository.URLCombined{
-			OriginalURL: req.OriginalUrl,
+			OriginalURL: req.OriginalURL,
 			ShortURL:    shortURL,
 		},
 	}

@@ -4,10 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
+
+	// Import for initializing the PostgreSQL driver.
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	"time"
 )
+
+// Response time. If longer returns an error.
+// Example: 'waitingTime = 10' ---> wait 10 seconds.
+const waitingTime = 10
 
 func PrepareConnection(ctx context.Context, config Config, logger *logrus.Logger) (*sql.DB, error) {
 	if err := config.ValidateWithContext(ctx); err != nil {
@@ -23,7 +29,7 @@ func PrepareConnection(ctx context.Context, config Config, logger *logrus.Logger
 	db.SetMaxIdleConns(config.MaxIdleConnections)
 	db.SetConnMaxLifetime(config.ConnMaxLifetime)
 
-	ctxPing, cancelPing := context.WithTimeout(ctx, 5*time.Second)
+	ctxPing, cancelPing := context.WithTimeout(ctx, waitingTime*time.Second)
 	defer cancelPing()
 
 	if err = db.PingContext(ctxPing); err != nil {

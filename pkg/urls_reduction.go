@@ -5,30 +5,30 @@ import (
 	"strings"
 )
 
-func ShortInfo(ShortUrl string) string {
+func ShortInfo(shortURL string) string {
 	extractLastSegment := func(link string) string {
-		parsedUrl, err := url.Parse(link)
+		parsedURL, err := url.Parse(link)
 		if err != nil {
 			return link
 		}
-		pathSegments := strings.Split(parsedUrl.Path, "/")
+		pathSegments := strings.Split(parsedURL.Path, "/")
 		if len(pathSegments) > 0 {
 			return pathSegments[len(pathSegments)-1]
 		}
 		return ""
 	}
-	nameShort := extractLastSegment(ShortUrl)
+	nameShort := extractLastSegment(shortURL)
 	return nameShort
 }
 
-func OriginalInfo(OriginalURL string) string {
+func OriginalInfo(originalURL string) string {
 	extractDomain := func(link string) string {
-		parsedUrl, err := url.Parse(link)
+		parsedURL, err := url.Parse(link)
 		if err != nil {
 			return link
 		}
-		return parsedUrl.Hostname()
+		return parsedURL.Hostname()
 	}
-	nameOrig := extractDomain(OriginalURL)
+	nameOrig := extractDomain(originalURL)
 	return nameOrig
 }

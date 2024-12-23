@@ -19,7 +19,7 @@ type GetListURLRequest struct {
 	UserID string `json:"user_id"`
 }
 
-type SaveUrlRequest struct {
+type SaveURLRequest struct {
 	UserID string       `json:"user_id"`
 	URL    *URLCombined `json:"url_combined"`
 }
@@ -29,13 +29,13 @@ type URLCombined struct {
 	ShortURL    string `json:"short_url"`
 }
 
-type GetUrlStatsRequest struct {
+type GetURLStatsRequest struct {
 	TgID     int64  `json:"tg_id"`
 	UserID   string `json:"user_id"`
 	ShortURL string `json:"short_url"`
 }
 
-type GetUrlStatsResponse struct {
+type GetURLStatsResponse struct {
 	ShortURL      string    `json:"short_url"`
 	RedirectCount int       `json:"redirect_count"`
 	CreatedAt     time.Time `json:"created_at"`

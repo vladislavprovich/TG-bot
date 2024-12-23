@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -51,7 +52,7 @@ func (u *userRepo) GetUserByTgID(ctx context.Context, req *GetUserByTgIDRequest)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			u.logger.Warnf("User not found: TelegramID %d", req.TgID)
-			return nil, nil
+			return nil, err
 		}
 		u.logger.Errorf("Failed to get user by Telegram ID: %v", err)
 		return nil, fmt.Errorf("error retrieving user: %w", err)

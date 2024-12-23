@@ -8,14 +8,14 @@ import (
 type converterToGetStats struct {
 }
 
-func NewConverterToGetStats() *converterToGetStats {
+func newConverterToGetStats() *converterToGetStats {
 	return &converterToGetStats{}
 }
 
 func (c *converterToGetStats) ConverterToNewStats(
-	req models.GetUrlStatusRequest,
+	req models.GetURLStatusRequest,
 ) *shortener.GetShortURLStatsRequest {
 	return &shortener.GetShortURLStatsRequest{
-		ShortURL: req.ShortUrl,
+		ShortURL: req.ShortURL,
 	}
 }

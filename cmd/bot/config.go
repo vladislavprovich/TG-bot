@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -21,7 +23,7 @@ type Config struct {
 
 func LoadConfig(ctx context.Context) (*Config, error) {
 	if err := godotenv.Load(); err != nil {
-		return nil, fmt.Errorf("Error loading .env file")
+		return nil, errors.New("error loading .env file")
 	}
 
 	var cfg Config

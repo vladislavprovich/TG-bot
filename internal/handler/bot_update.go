@@ -2,19 +2,26 @@ package handler
 
 import (
 	"context"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
 	"github.com/sirupsen/logrus"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/vladislavprovich/TG-bot/internal/keyboard"
 )
 
-const TimeUpdate = 60
+const (
+	// Frequency of starting and returning the channel to update in seconds. Default 60.
+	UpdateDelay = 60
+	// Offset is the last Update ID to include. Default 0.
+	OffSet = 0
+)
 
 func ProcessUpdates(ctx context.Context, bot *tgbotapi.BotAPI, buttonHandler *keyboard.HandleButtons, messageHandler *keyboard.HandleButtons, logger *logrus.Logger) {
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = TimeUpdate
+	u := tgbotapi.NewUpdate(OffSet)
+	u.Timeout = UpdateDelay
 
 	updates := bot.GetUpdatesChan(u)
-
+	logger.Info("Processing updates...")
 	for {
 		select {
 		case update := <-updates:

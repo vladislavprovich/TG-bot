@@ -7,14 +7,14 @@ import (
 type converterToTgID struct {
 }
 
-func NewConverterToTgID() *converterToTgID {
+func newConverterToTgID() *converterToTgID {
 	return &converterToTgID{}
 }
 
 func (c *converterToTgID) converterToTgID(
-	TgID int64,
+	tgID int64,
 ) *repository.GetUserByTgIDRequest {
 	return &repository.GetUserByTgIDRequest{
-		TgID: TgID,
+		TgID: tgID,
 	}
 }
