@@ -6,10 +6,12 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/vladislavprovich/TG-bot/pkg"
+
 	"github.com/sirupsen/logrus"
 	"github.com/vladislavprovich/TG-bot/internal/models"
 	"github.com/vladislavprovich/TG-bot/internal/repository"
-	"github.com/vladislavprovich/TG-bot/pkg"
+
 	"github.com/vladislavprovich/TG-bot/pkg/shortener"
 )
 
@@ -29,10 +31,10 @@ type (
 		repoUser            repository.UserRepository
 		logger              *logrus.Logger
 		convertToShortener  *converterToShortener
-		convertToStorage    *converterToStorage
-		convertToUser       *converterToUser
-		convertToTgID       *converterToTgID
 		converterToGetStats *converterToGetStats
+		converterToStorage  *converterToStorage
+		converterToTgID     *converterToTgID
+		converterToUser     *converterToUser
 	}
 
 	Params struct {
@@ -50,20 +52,22 @@ func NewService(params Params) URLService {
 		repoUser:            params.RepoUser,
 		logger:              params.Logger,
 		convertToShortener:  newConverterToShortener(),
-		convertToStorage:    newConverterToStorage(),
-		convertToUser:       newConverterToUser(),
-		convertToTgID:       newConverterToTgID(),
 		converterToGetStats: newConverterToGetStats(),
+		converterToStorage:  newConverterToStorage(),
+		converterToTgID:     newConverterToTgID(),
+		converterToUser:     newConverterToUser(),
 	}
 }
 
-func (s *Service) CreateShortURL(ctx context.Context, req models.CreateShortURLRequest) (models.CreateShortURLResponse,
-	error) {
+func (s *Service) CreateShortURL(
+	ctx context.Context,
+	req models.CreateShortURLRequest,
+) (models.CreateShortURLResponse, error) {
 	if req.OriginalURL == "" {
 		return models.CreateShortURLResponse{}, errors.New("origin url is empty")
 	}
 	if req.UserID == "" {
-		newReq := s.convertToTgID.converterToTgID(req.TgID)
+		newReq := s.converterToTgID.converterToTgID(req.TgID)
 		userIDresp, err := s.repoUser.GetUserByTgID(ctx, newReq)
 		if err != nil {
 			return models.CreateShortURLResponse{}, err
@@ -84,16 +88,13 @@ func (s *Service) CreateShortURL(ctx context.Context, req models.CreateShortURLR
 	}
 
 	convertedShortUrlReq := s.convertToShortener.ConvertToCreateShortURLRequest(req)
-
 	shortURLResp, err := s.client.CreateShortURL(ctx, convertedShortUrlReq)
-
 	if err != nil {
 		s.logger.Errorf("failed to create short url: %v", err)
 		return models.CreateShortURLResponse{}, err
 	}
 
-	saveReq := s.convertToStorage.ConvertToSaveURLReq(req, shortURLResp.ShortURL, req.UserID)
-
+	saveReq := s.converterToStorage.ConvertToSaveURLReq(req, shortURLResp.ShortURL, req.UserID)
 	if err = s.repo.SaveURL(ctx, saveReq); err != nil {
 		s.logger.Errorf("failed to save URL: %v", err)
 		return models.CreateShortURLResponse{}, err
@@ -152,7 +153,7 @@ func (s *Service) DeleteAllURL(ctx context.Context, id models.DeleteAllURL) erro
 }
 
 func (s *Service) CreateUserByTgID(ctx context.Context, req models.CreateNewUserRequest) (string, error) {
-	reqNew := s.convertToTgID.converterToTgID(req.TgID)
+	reqNew := s.converterToTgID.converterToTgID(req.TgID)
 
 	userResp, err := s.repoUser.GetUserByTgID(ctx, reqNew)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -165,14 +166,12 @@ func (s *Service) CreateUserByTgID(ctx context.Context, req models.CreateNewUser
 	}
 	userID := uuid.New().String()
 
-	saveUserReq := s.convertToUser.converterToNewUser(req, userID)
-
+	saveUserReq := s.converterToUser.converterToNewUser(req, userID)
 	err = s.repoUser.SaveUser(ctx, saveUserReq)
 	if err != nil {
 		s.logger.Errorf("failed to save user: %v", err)
 		return "", err
 	}
-
 	return saveUserReq.UserID, nil
 }
 
@@ -196,13 +195,11 @@ func (s *Service) GetURLStatus(ctx context.Context, req models.GetURLStatusReque
 		statsReq := &shortener.GetShortURLStatsRequest{
 			ShortURL: shortInfoUrls,
 		}
-
 		stats, err = s.client.GetStatsURL(ctx, statsReq)
 		if err != nil {
 			s.logger.Errorf("failed to get stats for short URL %s: %v", shortInfoUrls, err)
 			return nil, err
 		}
-
 		responses = append(responses, &models.GetURLStatusResponse{
 			ShortURL:      shortInfoUrls,
 			RedirectCount: stats.RedirectCount,
@@ -214,6 +211,5 @@ func (s *Service) GetURLStatus(ctx context.Context, req models.GetURLStatusReque
 		s.logger.Warnf("no valid stats found for user ID %s", req.UserID)
 		return nil, errors.New("no valid stats found for user URLs")
 	}
-
 	return responses, nil
 }

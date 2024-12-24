@@ -91,7 +91,7 @@ func CreateURLStatusButton(stats []*models.GetURLStatusResponse) *tgbotapi.Inlin
 
 		datePart := url.CreatedAt.Format("2006-01-02")
 		timePart := url.CreatedAt.Format("15:04")
-		formatDate := datePart + "\n" + timePart
+		formatDate := fmt.Sprintf(datePart + "\n" + timePart)
 
 		row := tgbotapi.NewInlineKeyboardRow(
 			// Button no usage. TG Api block localhost.

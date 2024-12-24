@@ -11,14 +11,14 @@ import (
 
 const (
 	// Frequency of starting and returning the channel to update in seconds. Default 60.
-	UpdateDelay = 60
+	updateDelay = 60
 	// Offset is the last Update ID to include. Default 0.
-	OffSet = 0
+	fffSet = 0
 )
 
 func ProcessUpdates(ctx context.Context, bot *tgbotapi.BotAPI, buttonHandler *keyboard.HandleButtons, messageHandler *keyboard.HandleButtons, logger *logrus.Logger) {
-	u := tgbotapi.NewUpdate(OffSet)
-	u.Timeout = UpdateDelay
+	u := tgbotapi.NewUpdate(fffSet)
+	u.Timeout = updateDelay
 
 	updates := bot.GetUpdatesChan(u)
 	logger.Info("Processing updates...")
@@ -27,8 +27,14 @@ func ProcessUpdates(ctx context.Context, bot *tgbotapi.BotAPI, buttonHandler *ke
 		case update := <-updates:
 			if update.CallbackQuery != nil {
 				go buttonHandler.HandleCallbackQuery(ctx, bot, update)
+				if update.CallbackQuery != nil {
+					go buttonHandler.DeleteButtons(ctx, bot, update)
+				}
 			} else if update.Message != nil {
 				go messageHandler.HandleMessage(ctx, bot, update)
+				if update.Message != nil {
+					go messageHandler.UserRegister(ctx, bot, update)
+				}
 			}
 		case <-ctx.Done():
 			return
