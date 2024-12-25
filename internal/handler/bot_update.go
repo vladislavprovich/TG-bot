@@ -13,11 +13,11 @@ const (
 	// Frequency of starting and returning the channel to update in seconds. Default 60.
 	updateDelay = 60
 	// Offset is the last Update ID to include. Default 0.
-	fffSet = 0
+	offSet = 0
 )
 
 func ProcessUpdates(ctx context.Context, bot *tgbotapi.BotAPI, buttonHandler *keyboard.HandleButtons, messageHandler *keyboard.HandleButtons, logger *logrus.Logger) {
-	u := tgbotapi.NewUpdate(fffSet)
+	u := tgbotapi.NewUpdate(offSet)
 	u.Timeout = updateDelay
 
 	updates := bot.GetUpdatesChan(u)

@@ -31,10 +31,10 @@ type (
 		repoUser            repository.UserRepository
 		logger              *logrus.Logger
 		convertToShortener  *converterToShortener
-		converterToGetStats *converterToGetStats
+		converterToGetStats *converterToShortener
 		converterToStorage  *converterToStorage
-		converterToTgID     *converterToTgID
-		converterToUser     *converterToUser
+		converterToTgID     *converterToStorage
+		converterToUser     *converterToStorage
 	}
 
 	Params struct {

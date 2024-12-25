@@ -8,16 +8,14 @@ import (
 type converterToShortener struct {
 }
 
-type converterToGetStats struct {
-}
-
 func newConverterToShortener() *converterToShortener {
 	return &converterToShortener{}
 }
 
-func newConverterToGetStats() *converterToGetStats {
-	return &converterToGetStats{}
+func newConverterToGetStats() *converterToShortener {
+	return &converterToShortener{}
 }
+
 func (c *converterToShortener) ConvertToCreateShortURLRequest(
 	req models.CreateShortURLRequest,
 ) *shortener.CreateShortURLRequest {
@@ -27,7 +25,7 @@ func (c *converterToShortener) ConvertToCreateShortURLRequest(
 	}
 }
 
-func (c *converterToGetStats) ConverterToNewStats(
+func (c *converterToShortener) ConverterToNewStats(
 	req models.GetURLStatusRequest,
 ) *shortener.GetShortURLStatsRequest {
 	return &shortener.GetShortURLStatsRequest{

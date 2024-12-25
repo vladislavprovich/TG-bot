@@ -5,25 +5,19 @@ import (
 	"github.com/vladislavprovich/TG-bot/internal/repository"
 )
 
-type converterToUser struct {
-}
-
-type converterToTgID struct {
-}
-
 type converterToStorage struct {
 }
 
-func newConverterToTgID() *converterToTgID {
-	return &converterToTgID{}
+func newConverterToTgID() *converterToStorage {
+	return &converterToStorage{}
 }
 
 func newConverterToStorage() *converterToStorage {
 	return &converterToStorage{}
 }
 
-func newConverterToUser() *converterToUser {
-	return &converterToUser{}
+func newConverterToUser() *converterToStorage {
+	return &converterToStorage{}
 }
 
 func (c *converterToStorage) ConvertToSaveURLReq(
@@ -40,7 +34,7 @@ func (c *converterToStorage) ConvertToSaveURLReq(
 	}
 }
 
-func (c *converterToTgID) converterToTgID(
+func (c *converterToStorage) converterToTgID(
 	tgID int64,
 ) *repository.GetUserByTgIDRequest {
 	return &repository.GetUserByTgIDRequest{
@@ -48,7 +42,7 @@ func (c *converterToTgID) converterToTgID(
 	}
 }
 
-func (c *converterToUser) converterToNewUser(
+func (c *converterToStorage) converterToNewUser(
 	req models.CreateNewUserRequest,
 	userID string,
 ) *repository.SaveUserRequest {
