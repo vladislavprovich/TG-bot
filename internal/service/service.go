@@ -26,15 +26,12 @@ type URLService interface {
 
 type (
 	Service struct {
-		client              shortener.Client
-		repo                repository.URLRepository
-		repoUser            repository.UserRepository
-		logger              *logrus.Logger
-		convertToShortener  *converterToShortener
-		converterToGetStats *converterToShortener
-		converterToStorage  *converterToStorage
-		converterToTgID     *converterToStorage
-		converterToUser     *converterToStorage
+		client             shortener.Client
+		repo               repository.URLRepository
+		repoUser           repository.UserRepository
+		logger             *logrus.Logger
+		convertToShortener *converterToShortener
+		converterToStorage *converterToStorage
 	}
 
 	Params struct {
@@ -47,15 +44,12 @@ type (
 
 func NewService(params Params) URLService {
 	return &Service{
-		client:              params.Client,
-		repo:                params.Repo,
-		repoUser:            params.RepoUser,
-		logger:              params.Logger,
-		convertToShortener:  newConverterToShortener(),
-		converterToGetStats: newConverterToGetStats(),
-		converterToStorage:  newConverterToStorage(),
-		converterToTgID:     newConverterToTgID(),
-		converterToUser:     newConverterToUser(),
+		client:             params.Client,
+		repo:               params.Repo,
+		repoUser:           params.RepoUser,
+		logger:             params.Logger,
+		convertToShortener: newConverterToShortener(),
+		converterToStorage: newConverterToStorage(),
 	}
 }
 
@@ -67,7 +61,7 @@ func (s *Service) CreateShortURL(
 		return models.CreateShortURLResponse{}, errors.New("origin url is empty")
 	}
 	if req.UserID == "" {
-		newReq := s.converterToTgID.converterToTgID(req.TgID)
+		newReq := s.converterToStorage.converterToTgID(req.TgID)
 		userIDresp, err := s.repoUser.GetUserByTgID(ctx, newReq)
 		if err != nil {
 			return models.CreateShortURLResponse{}, err
@@ -153,7 +147,7 @@ func (s *Service) DeleteAllURL(ctx context.Context, id models.DeleteAllURL) erro
 }
 
 func (s *Service) CreateUserByTgID(ctx context.Context, req models.CreateNewUserRequest) (string, error) {
-	reqNew := s.converterToTgID.converterToTgID(req.TgID)
+	reqNew := s.converterToStorage.converterToTgID(req.TgID)
 
 	userResp, err := s.repoUser.GetUserByTgID(ctx, reqNew)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -166,7 +160,7 @@ func (s *Service) CreateUserByTgID(ctx context.Context, req models.CreateNewUser
 	}
 	userID := uuid.New().String()
 
-	saveUserReq := s.converterToUser.converterToNewUser(req, userID)
+	saveUserReq := s.converterToStorage.converterToNewUser(req, userID)
 	err = s.repoUser.SaveUser(ctx, saveUserReq)
 	if err != nil {
 		s.logger.Errorf("failed to save user: %v", err)

@@ -12,10 +12,6 @@ func newConverterToShortener() *converterToShortener {
 	return &converterToShortener{}
 }
 
-func newConverterToGetStats() *converterToShortener {
-	return &converterToShortener{}
-}
-
 func (c *converterToShortener) ConvertToCreateShortURLRequest(
 	req models.CreateShortURLRequest,
 ) *shortener.CreateShortURLRequest {

@@ -8,15 +8,7 @@ import (
 type converterToStorage struct {
 }
 
-func newConverterToTgID() *converterToStorage {
-	return &converterToStorage{}
-}
-
 func newConverterToStorage() *converterToStorage {
-	return &converterToStorage{}
-}
-
-func newConverterToUser() *converterToStorage {
 	return &converterToStorage{}
 }
 
